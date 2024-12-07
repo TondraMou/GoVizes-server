@@ -51,6 +51,27 @@ async function run() {
         res.status(500).send("Error fetching visas");
       }
     });
+
+
+    // Fetch Visa by ID Route
+app.get('/visa/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { ObjectId } = require('mongodb');
+    const visaId = new ObjectId(id);
+
+    const visa = await visaCollection.findOne({ _id: visaId });
+
+    if (visa) {
+      res.json(visa); 
+    } else {
+      res.status(404).send({ message: "Visa not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching visa by ID:", error);
+    res.status(500).send({ message: "Error fetching visa by ID" });
+  }
+});
     
 
     // Fetch the latest 6 visas
