@@ -76,13 +76,24 @@ app.get('/visa/:id', async (req, res) => {
 });
     
 
+const { ObjectId } = require('mongodb'); 
+
 // Submit Visa Application Route
 app.post('/apply-visa', async (req, res) => {
   try {
     const { email, firstName, lastName, fee, visaId } = req.body;
     const appliedDate = new Date(); 
 
-    
+    if (!ObjectId.isValid(visaId)) {
+      return res.status(400).send({ message: "Invalid visaId format" });
+    }
+
+    const visaDetails = await visaCollection.findOne({ _id: new ObjectId(visaId) });
+
+    if (!visaDetails) {
+      return res.status(404).send({ message: "Visa details not found for the given visaId" });
+    }
+
     const application = {
       email,
       firstName,
@@ -92,7 +103,6 @@ app.post('/apply-visa', async (req, res) => {
       visaId,
     };
 
-   
     const result = await userCollection.insertOne(application);
 
     res.status(200).send({ message: "Application submitted successfully", result });
@@ -101,6 +111,55 @@ app.post('/apply-visa', async (req, res) => {
     res.status(500).send({ message: "Error submitting visa application" });
   }
 });
+
+
+
+
+// Get User's Visa Applications Route
+app.get('/my-visa-applications', async (req, res) => {
+  try {
+    const userEmail = req.query.email;
+
+    // Find applications by user's email
+    const userApplications = await userCollection.find({ email: userEmail }).toArray();
+
+    const applicationsWithVisaDetails = await Promise.all(
+      userApplications.map(async (application) => {
+        const visaDetails = await visaCollection.findOne({ _id: new ObjectId(application.visaId) });
+        return {
+          ...application,
+          visaDetails,
+        };
+      })
+    );
+
+    res.status(200).json(applicationsWithVisaDetails); 
+  } catch (error) {
+    console.error("Error fetching visa applications:", error);
+    res.status(500).send({ message: "Error fetching visa applications" });
+  }
+});
+
+// Delete Visa Application Route 
+app.delete('/cancel-visa-application', async (req, res) => {
+  try {
+    const { applicationId } = req.body;
+    
+    
+    const result = await userCollection.deleteOne({ _id: new ObjectId(applicationId) });
+    
+    if (result.deletedCount === 1) {
+      res.status(200).send({ message: 'Application canceled successfully' });
+    } else {
+      res.status(400).send({ message: 'Failed to cancel application' });
+    }
+  } catch (error) {
+    console.error("Error canceling visa application:", error);
+    res.status(500).send({ message: "Error canceling visa application" });
+  }
+});
+
+
 
 
     // Fetch the latest 6 visas
