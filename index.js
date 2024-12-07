@@ -39,6 +39,18 @@ async function run() {
       const result = await visaCollection.insertOne(newVisa);
       res.send(result);
     });
+
+
+    // Get All Visas Route 
+    app.get('/visas', async (req, res) => {
+      try {
+        const visas = await visaCollection.find({}).toArray(); 
+        res.json(visas);
+      } catch (error) {
+        console.error("Error fetching visas:", error);
+        res.status(500).send("Error fetching visas");
+      }
+    });
     
 
     // Fetch the latest 6 visas
