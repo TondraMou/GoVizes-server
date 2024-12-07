@@ -41,6 +41,21 @@ async function run() {
     });
     
 
+    // Fetch the latest 6 visas
+app.get('/latest-visas', async (req, res) => {
+  try {
+    const latestVisas = await visaCollection
+      .find({}) 
+      .sort({ _id: -1 }) 
+      .limit(6) 
+      .toArray(); 
+    res.send(latestVisas);
+  } catch (error) {
+    console.error('Error fetching latest visas:', error);
+    res.status(500).send({ message: 'Internal server error' });
+  }
+});
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
