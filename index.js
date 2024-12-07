@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb'); // Declare ObjectId here
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 5000;
 
@@ -53,16 +53,16 @@ async function run() {
       }
     });
 
-    // Get All Visas Route
-    app.get('/visa', async (req, res) => {
-      try {
-        const visas = await visaCollection.find({}).toArray(); 
-        res.json(visas);
-      } catch (error) {
-        console.error("Error fetching visas:", error);
-        res.status(500).send("Error fetching visas");
-      }
-    });
+// Get All Visas Route
+app.get('/visa', async (req, res) => {
+  try {
+    const visas = await visaCollection.find({}).toArray(); 
+    res.json(visas);
+  } catch (error) {
+    console.error("Error fetching visas:", error);
+    res.status(500).send("Error fetching visas");
+  }
+});
 
     // Fetch Visa by ID Route
     app.get('/visa/:id', async (req, res) => {
