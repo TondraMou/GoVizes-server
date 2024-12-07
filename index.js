@@ -31,6 +31,8 @@ async function run() {
     const database = client.db('visaDB');
     const visaCollection = database.collection('visa');
 
+    const userCollection = client.db('visaDB').collection('users');
+
 
     // Add Visa Route
     app.post('/visa', async(req, res) => {
@@ -73,6 +75,33 @@ app.get('/visa/:id', async (req, res) => {
   }
 });
     
+
+// Submit Visa Application Route
+app.post('/apply-visa', async (req, res) => {
+  try {
+    const { email, firstName, lastName, fee, visaId } = req.body;
+    const appliedDate = new Date(); 
+
+    
+    const application = {
+      email,
+      firstName,
+      lastName,
+      fee,
+      appliedDate,
+      visaId,
+    };
+
+   
+    const result = await userCollection.insertOne(application);
+
+    res.status(200).send({ message: "Application submitted successfully", result });
+  } catch (error) {
+    console.error("Error submitting visa application:", error);
+    res.status(500).send({ message: "Error submitting visa application" });
+  }
+});
+
 
     // Fetch the latest 6 visas
 app.get('/latest-visas', async (req, res) => {
